@@ -1,0 +1,148 @@
+@import url("https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #e8dfd0;
+  --color-surface: #f4efe4;
+  --color-fg: #1a1410;
+  --color-muted: #6e6558;
+  --color-primary: #8f2a1b;
+  --color-primary-fg: #f7f1e6;
+  --color-border: #c9bba6;
+  --color-me: #2a3d5c;
+  --color-opp: #ebe4d6;
+  --color-danger: #8f2a1b;
+  --color-ok: #3d4a38;
+  --color-ink: #1a1410;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --font-sans: "Zen Kaku Gothic New", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Zen Antique", "Noto Serif TC", "Iowan Old Style", Georgia, serif;
+  --tracking-seal: 0.35em;
+  --tracking-nav: 0.12em;
+  --shadow-card: 0 0 0 1px color-mix(in oklab, var(--color-fg) 8%, transparent),
+    0 10px 28px color-mix(in oklab, var(--color-fg) 6%, transparent);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html,
+  body,
+  #app {
+    min-height: 100%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+  body {
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    background-color: var(--color-bg);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='42' viewBox='0 0 84 42'%3E%3Cg fill='none' stroke='%231A1410' stroke-width='0.7' opacity='0.085'%3E%3Cpath d='M-21 42a21 21 0 0 1 42 0 21 21 0 0 1 42 0 21 21 0 0 1 42 0'/%3E%3Cpath d='M-14 42a14 14 0 0 1 28 0 14 14 0 0 1 28 0 14 14 0 0 1 28 0 14 14 0 0 1 28 0'/%3E%3Cpath d='M-7 42a7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0'/%3E%3C/g%3E%3C/svg%3E"),
+      repeating-linear-gradient(
+        91deg,
+        transparent,
+        transparent 12px,
+        color-mix(in oklab, var(--color-fg) 2.2%, transparent) 12px,
+        color-mix(in oklab, var(--color-fg) 2.2%, transparent) 13px
+      );
+    background-size: 84px 42px, auto;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.washi {
+  background-color: var(--color-bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='42' viewBox='0 0 84 42'%3E%3Cg fill='none' stroke='%231A1410' stroke-width='0.7' opacity='0.1'%3E%3Cpath d='M-21 42a21 21 0 0 1 42 0 21 21 0 0 1 42 0 21 21 0 0 1 42 0'/%3E%3Cpath d='M-14 42a14 14 0 0 1 28 0 14 14 0 0 1 28 0 14 14 0 0 1 28 0 14 14 0 0 1 28 0'/%3E%3Cpath d='M-7 42a7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0 7 7 0 0 1 14 0'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 84px 42px;
+}
+
+.page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.page-kicker::before {
+  content: "";
+  width: 3px;
+  height: 0.92em;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.stamp-face {
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--color-primary-fg) 38%, transparent);
+}
+
+.scroll-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    inset 0 0 0 3px var(--color-surface),
+    inset 0 0 0 4px color-mix(in oklab, var(--color-primary) 28%, var(--color-border));
+}
+
+.ink-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border) 10%,
+    var(--color-border) 90%,
+    transparent
+  );
+}
+
+.vertical-seal {
+  writing-mode: vertical-rl;
+  letter-spacing: 0.45em;
+}
+
+@media print {
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
