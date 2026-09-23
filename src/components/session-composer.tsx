@@ -112,8 +112,8 @@ export function SessionComposer({
     setCards((c) => [...c, next]);
     setAction(null);
     setFail(null);
-    setResult("drill");
-    setRole("attack");
+    // Keep result + role sticky so consecutive chip taps stay in the same mode
+    // (log-a-class must stay the fastest free path).
   };
 
   const startTimer = (onDone: () => void) => {
@@ -412,7 +412,7 @@ export function SessionComposer({
         </section>
 
         <section>
-          <p className="mb-2 text-sm font-medium">動作 · 點一下就入卡</p>
+          <p className="mb-2 text-sm font-medium">動作 · 點一下就入卡（沿用上方結果）</p>
           <div className="flex flex-wrap gap-2">
             {actionChips.map((n) => (
               <Chip
