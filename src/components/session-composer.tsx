@@ -305,6 +305,53 @@ export function SessionComposer({
   };
 
   const actionChips = actionsFrom(from);
+  const lastCard = cards[cards.length - 1];
+
+  // Pro users keep voice right under the chips; free users get it below the card list.
+  const voiceSection = (
+    <section className="rounded-lg border border-border bg-surface p-4 scroll-card">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium">語音 20 秒</p>
+        {!isPro && <span className="text-xs text-muted">Pro</span>}
+      </div>
+      <button
+        type="button"
+        onClick={listening ? stopVoice : () => void startVoice()}
+        className={cn(
+          "mt-3 flex h-20 w-full items-center justify-center gap-3 rounded-md border border-border transition-colors",
+          listening ? "bg-primary text-primary-fg" : "bg-bg text-fg",
+        )}
+      >
+        {listening ? <Square className="size-5" /> : <Mic className="size-6" />}
+        <span className="font-display text-xl tabular-nums">
+          {listening ? `0:${String(seconds).padStart(2, "0")}` : "開始說"}
+        </span>
+      </button>
+      <p className="mt-2 text-xs text-muted">
+        「Closed guard triangle, posted and lost; got knee-cut twice」
+      </p>
+      <Input
+        className="mt-3"
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        placeholder="或把剛才說的打在這"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && transcript.trim()) void runParse(transcript);
+        }}
+      />
+      {transcript && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="mt-2"
+          onClick={() => void runParse(transcript)}
+          disabled={busy}
+        >
+          拆成卡片
+        </Button>
+      )}
+    </section>
+  );
 
   return (
     <div className="fixed inset-0 z-40 mx-auto flex max-w-lg flex-col bg-bg">
@@ -317,7 +364,11 @@ export function SessionComposer({
         </button>
         <div className="text-center">
           <p className="font-display text-lg">今天的課</p>
-          <p className="text-xs text-muted">語音、點選、照片可混用</p>
+          <p className="text-xs text-muted" aria-live="polite">
+            {lastCard
+              ? `已加 ${cards.length} 張 · ${nodeLabel(lastCard.actionNode ?? lastCard.fromNode)}`
+              : "語音、點選、照片可混用"}
+          </p>
         </div>
         <Button size="sm" onClick={save} disabled={busy}>
           {busy ? "…" : "儲存"}
@@ -325,80 +376,31 @@ export function SessionComposer({
       </header>
 
       <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
-        <div className="flex flex-wrap gap-2">
-          <Input
-            value={gym}
-            onChange={(e) => setGym(e.target.value)}
-            placeholder="館名"
-            className="h-10 w-32"
-          />
-          <Chip selected={giType === "gi"} onClick={() => setGiType("gi")}>
-            Gi
+        {/* Chips first: result → position → action, so the fastest free path
+            needs no scrolling past voice / session meta. */}
+        <section className="flex flex-wrap gap-2">
+          {(["drill", "success", "failed"] as const).map((r) => (
+            <Chip key={r} selected={result === r} onClick={() => setResult(r)}>
+              {r === "drill" ? "鑽研" : r === "success" ? "成功" : "被破"}
+            </Chip>
+          ))}
+          <Chip selected={role === "defense"} onClick={() => setRole(role === "defense" ? "attack" : "defense")}>
+            {role === "defense" ? "我被過／被鎖" : "我進攻"}
           </Chip>
-          <Chip selected={giType === "no-gi"} onClick={() => setGiType("no-gi")}>
-            No-Gi
-          </Chip>
-          <Chip selected={kind === "drill"} onClick={() => setKind("drill")}>
-            只鑽
-          </Chip>
-          <Chip selected={kind === "roll"} onClick={() => setKind("roll")}>
-            滾輪
-          </Chip>
-          <Chip selected={kind === "mixed"} onClick={() => setKind("mixed")}>
-            鑽＋滾
-          </Chip>
-          <Input
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            inputMode="numeric"
-            className="h-10 w-20"
-            aria-label="時長"
-          />
-          <span className="self-center text-xs text-muted">分鐘</span>
-        </div>
-
-        <section className="rounded-lg border border-border bg-surface p-4 scroll-card">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">語音 20 秒</p>
-            {!isPro && <span className="text-xs text-muted">Pro</span>}
-          </div>
-          <button
-            type="button"
-            onClick={listening ? stopVoice : () => void startVoice()}
-            className={cn(
-              "mt-3 flex h-20 w-full items-center justify-center gap-3 rounded-md border border-border transition-colors",
-              listening ? "bg-primary text-primary-fg" : "bg-bg text-fg",
-            )}
-          >
-            {listening ? <Square className="size-5" /> : <Mic className="size-6" />}
-            <span className="font-display text-xl tabular-nums">
-              {listening ? `0:${String(seconds).padStart(2, "0")}` : "開始說"}
-            </span>
-          </button>
-          <p className="mt-2 text-xs text-muted">
-            「Closed guard triangle, posted and lost; got knee-cut twice」
-          </p>
-          <Input
-            className="mt-3"
-            value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
-            placeholder="或把剛才說的打在這"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && transcript.trim()) void runParse(transcript);
-            }}
-          />
-          {transcript && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="mt-2"
-              onClick={() => void runParse(transcript)}
-              disabled={busy}
-            >
-              拆成卡片
-            </Button>
-          )}
         </section>
+
+        {result === "failed" && (
+          <section>
+            <p className="mb-2 text-sm font-medium">常見失敗</p>
+            <div className="flex flex-wrap gap-2">
+              {FAIL_REASONS.map((f) => (
+                <Chip key={f} selected={fail === f} onClick={() => setFail(fail === f ? null : f)}>
+                  {failLabel(f)}
+                </Chip>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section>
           <p className="mb-2 text-sm font-medium">位置</p>
@@ -432,34 +434,12 @@ export function SessionComposer({
           </div>
         </section>
 
-        <section className="flex flex-wrap gap-2">
-          {(["drill", "success", "failed"] as const).map((r) => (
-            <Chip key={r} selected={result === r} onClick={() => setResult(r)}>
-              {r === "drill" ? "鑽研" : r === "success" ? "成功" : "被破"}
-            </Chip>
-          ))}
-          <Chip selected={role === "defense"} onClick={() => setRole(role === "defense" ? "attack" : "defense")}>
-            {role === "defense" ? "我被過／被鎖" : "我進攻"}
-          </Chip>
-        </section>
-
-        {result === "failed" && (
-          <section>
-            <p className="mb-2 text-sm font-medium">常見失敗</p>
-            <div className="flex flex-wrap gap-2">
-              {FAIL_REASONS.map((f) => (
-                <Chip key={f} selected={fail === f} onClick={() => setFail(fail === f ? null : f)}>
-                  {failLabel(f)}
-                </Chip>
-              ))}
-            </div>
-          </section>
-        )}
-
         <Button variant="secondary" className="w-full" onClick={() => addCard()} disabled={!from && !action}>
           <Check className="size-4" />
           加入這張卡
         </Button>
+
+        {isPro && voiceSection}
 
         <section>
           <div className="mb-2 flex items-center justify-between">
@@ -528,6 +508,41 @@ export function SessionComposer({
             </div>
           )}
         </section>
+
+        {!isPro && voiceSection}
+
+        <div className="flex flex-wrap gap-2">
+          <Input
+            value={gym}
+            onChange={(e) => setGym(e.target.value)}
+            placeholder="館名"
+            className="h-10 w-32"
+          />
+          <Chip selected={giType === "gi"} onClick={() => setGiType("gi")}>
+            Gi
+          </Chip>
+          <Chip selected={giType === "no-gi"} onClick={() => setGiType("no-gi")}>
+            No-Gi
+          </Chip>
+          <Chip selected={kind === "drill"} onClick={() => setKind("drill")}>
+            只鑽
+          </Chip>
+          <Chip selected={kind === "roll"} onClick={() => setKind("roll")}>
+            滾輪
+          </Chip>
+          <Chip selected={kind === "mixed"} onClick={() => setKind("mixed")}>
+            鑽＋滾
+          </Chip>
+          <Input
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            inputMode="numeric"
+            className="h-10 w-20"
+            aria-label="時長"
+          />
+          <span className="self-center text-xs text-muted">分鐘</span>
+        </div>
+
         {error && <p className="text-sm text-danger">{error}</p>}
         <div className="h-8" />
       </div>
