@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Check, Mic, Square, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
   parseUtterance,
   positions,
 } from "@/lib/catalog";
+import { orderPositions, type PositionHistory } from "@/lib/position-order";
 import { parseVoice, saveSession, generateReview, transcribeAudio } from "@/lib/server/bjj";
 import type { CardResult, CardRole, GiType, ParsedCardDraft, SessionKind } from "@/lib/types";
 import { cn, todayISO } from "@/lib/utils";
@@ -56,11 +57,14 @@ function blobToBase64(blob: Blob): Promise<string> {
 export function SessionComposer({
   gymDefault,
   isPro,
+  history,
   onClose,
   onSaved,
 }: {
   gymDefault: string | null;
   isPro: boolean;
+  /** Recent sessions; drives which positions show first (no swipe for the usual one). */
+  history?: PositionHistory;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -304,6 +308,9 @@ export function SessionComposer({
     }
   };
 
+  // Order is computed from saved history only, so chips never jump under the
+  // finger mid-class; the tapped chip stays where it was.
+  const positionChips = useMemo(() => orderPositions(positions(), history ?? [], todayISO()), [history]);
   const actionChips = actionsFrom(from);
   const lastCard = cards[cards.length - 1];
 
@@ -405,7 +412,7 @@ export function SessionComposer({
         <section>
           <p className="mb-2 text-sm font-medium">位置</p>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {positions().map((n) => (
+            {positionChips.map((n) => (
               <Chip key={n.id} selected={from === n.id} onClick={() => setFrom(from === n.id ? null : n.id)}>
                 {n.en}
               </Chip>
