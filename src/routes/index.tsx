@@ -116,6 +116,7 @@ function TodayInner() {
         <SessionComposer
           gymDefault={data.profile.gymName}
           isPro={data.profile.isPro}
+          history={data.sessions}
           onClose={() => setOpen(false)}
           onSaved={() => {
             setOpen(false);
